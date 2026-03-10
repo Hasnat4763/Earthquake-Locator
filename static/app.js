@@ -46,4 +46,55 @@ function renderRow(feature) {
     }).join("");
 }
 
-function 
+function setDefaultDates() {
+    const end = new Date();
+    const start = new Date(Date.now() - 7*24*3600*1000);
+
+    const endStr = end.toISOString().slice(0,10);
+    const startStr = start.toISOString().slice(0,10);
+
+    document.querySelector('input[name="start_time"]').value = startStr;
+    document.querySelector('input[name="end_time"]').value = endStr;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    setDefaultDates();
+
+    const form = document.getElementById('searchForm');
+    const resetBtn = document.getElementById('resetBtn');
+
+    resetBtn.addEventListener('click', ()=> {
+        form.reset();
+        setDefaultDates();
+        setStatus("Idle");
+        renderRow([]);
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const params = new URLSearchParams(fd);
+
+        setStatus("Loading");
+
+        try {
+            const res = await fetch(`/api/earthquakes?${params.toString()}`);
+            const data = await res.json();
+
+            if(!res.ok) {
+                setStatus(`Error: ${data.error || res.statusText}`);
+                renderRow([]);
+                return;
+            }
+
+            const features = data.features || [];
+            setStatus(`Found ${features.length} earthquakes`);
+            renderRow(features);
+
+        }
+        catch (err) {
+            setStatus(`Error: ${err.message}`);
+            renderRow([]);
+        }
+    })
+})
