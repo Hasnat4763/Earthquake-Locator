@@ -40,6 +40,7 @@ def get_earthquakes():
     minimum_magnitude = request.args.get('min_magnitude')
     order_by = request.args.get('order_by')
     limit = request.args.get('limit')
+
     params = {
         'format':'geojson',
         'starttime': start_time,
@@ -47,8 +48,8 @@ def get_earthquakes():
         'minmagnitude': minimum_magnitude,
         'orderby': order_by,
         'limit': limit
-    }
-    
+        }
+    print(params)
     try:
         response = requests.get(USGS_API_URL_BASE, params=params)
         response.raise_for_status()
@@ -59,6 +60,41 @@ def get_earthquakes():
         }), 500
         
     return jsonify(response.json()), 200
+
+
+@app.route('/api/earthquakes/radius')
+def earthquakes_by_radius():
+    start_time = request.args.get('start_time')
+    end_time = request.args.get('end_time')
+    minimum_magnitude = request.args.get('min_magnitude')
+    order_by = request.args.get('order_by')
+    limit = request.args.get('limit')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    maxradiuskm = request.args.get('max_radius_km')
+    params = {
+        'format':'geojson',
+        'starttime': start_time,
+        'endtime': end_time,
+        'minmagnitude': minimum_magnitude,
+        'orderby': order_by,
+        'limit': limit,
+        'latitude': latitude,
+        'longitude': longitude,
+        'maxradiuskm': maxradiuskm
+    }
+    try:
+        response = requests.get(USGS_API_URL_BASE, params=params)
+        response.raise_for_status()
+        print(response.url)
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'error': 'Failed to fetch earthquake data from USGS API.',
+            'details': str(e)
+        }), 500
+    
+    return jsonify(response.json()), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)

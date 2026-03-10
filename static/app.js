@@ -56,6 +56,8 @@ function setDefaultDates() {
     document.querySelector('input[name="start_time"]').value = startStr;
     document.querySelector('input[name="end_time"]').value = endStr;
     document.querySelector('input[name="min_magnitude"]').value = min_magnitude;
+    document.querySelector('select[name="order_by"]').value = "time";
+    document.querySelector('input[name="max_radius"]').value = 100;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -76,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(form);
+        console.log("Form Data:", Object.fromEntries(fd.entries()));
         const params = new URLSearchParams(fd);
 
         setStatus("Loading");
@@ -101,7 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })
 
-    locbtn.addEventListener('click', async(e) => {
+    
+    async function getLocation(e) {
         e.preventDefault();
         const lfd = new FormData(location_form);
         const Location = lfd.get("location").trim();
@@ -118,11 +122,52 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const lat = data.latitude;
             const lon = data.longitude;
-            document.querySelector('input[name="latitude"]').value = lat;
-            document.querySelector('input[name="longitude"]').value = lon;
+            document.querySelector('input[name="latitude"]').value = lat.toFixed(4);
+            document.querySelector('input[name="longitude"]').value = lon.toFixed(4);
         }
         catch (err) {
             setStatus(`Error geocoding Location ${err.message}`);
+        }
+    }
+    locbtn.addEventListener('click', getLocation);
+
+    location_form.addEventListener('submit', async(e) => {
+        e.preventDefault();
+        renderRow([]);
+        await getLocation(e);
+        const lfd = new FormData(location_form);
+        const fd = new FormData(form);
+        const MaxRadius = lfd.get("max_radius").trim();
+        const starttime = fd.get("start_time");
+        const endtime = fd.get("end_time");
+        const min_magnitude = fd.get("min_magnitude");
+        const orderby = fd.get("order_by");
+        const params = new URLSearchParams({
+            start_time: starttime,
+            end_time: endtime,
+            min_magnitude: min_magnitude,
+            order_by: orderby,
+            limit: 100,
+            latitude: lfd.get("latitude") || "",
+            longitude: lfd.get("longitude") || "",
+            max_radius_km: MaxRadius || "",
+        });
+        setStatus("Loading");
+        try {
+            const res = await fetch(`/api/earthquakes/radius?${params.toString()}`);
+            const data = await res.json();
+            if(!res.ok) {
+                setStatus(`Error: ${data.error || res.statusText}`);
+                renderRow([]);
+                return;
+            }
+            const features = data.features || [];
+            setStatus(`Found ${features.length} earthquakes`);
+            renderRow(features);
+        }
+        catch (err) {
+            setStatus(`Error: ${err.message}`);
+            renderRow([]);
         }
     })
 })
