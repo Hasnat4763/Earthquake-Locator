@@ -40,7 +40,6 @@ function renderRow(feature) {
                 <td>${mag}</td>
                 <td>${place}</td>
                 <td>${depthkm ?? ""}</td>
-                <td>${url ? `<a href=${url} target="_blank" rel="noreferrer noopener"> USGS </a>` : ""}</td>
             </tr>
         `;
     }).join("");
