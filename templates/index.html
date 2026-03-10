@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name-'viewport' content='width=device-width, initial-scale=1'>
+    <title>Earthquake Locator</title>
+    <link rel='stylesheet' href='{{ url_for('static', filename='style.css')}}'
+</head>
+<body>
+    <h1>Earthquake Locator</h1>
+    <form id='searchform' class='form'>
+        <div class='grid'>
+            <label>
+                Start Date (UTC)
+                <input type='date' name='start_date' required />
+            </label>
+            <label>
+                End Date (UTC)
+                <input type='date' name='end_date' required />
+            </label>
+            <label>
+                Minimum Magnitude
+                <input type='number' name='min_magnitude' step='0.1' required />
+            </label>
+
+            <label>
+                Order By
+                <select name='order_by' required>
+                    <option value='time'>Time</option>
+                    <option value='time-asc'> Time Oldest</option>
+                    <option value='magnitude'>Magnitude</option>
+                    <option value='magnitude-asc'>Magnitude Lowest</option>
+                </select>
+            </label>
+        </div>
+        <button type='submit'> Search for Shi </button>
+    </form>
+
+    <section class='card'>
+        <div class="statusrow">
+            <h2>Result</h2>
+            <div id='status'>Idle</div>
+        </div>
+
+        <div class='tablewrap'>
+            <table id='resulttable'>
+                <thread>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>Magnitude</th>
+                        <th>Location</th>
+                        <th>Depth (km)</th>
+                    </tr>
+                </thread>
+                <tbody id='resultbody'>
+                    <tr>
+                        <td colspan='5' class='muted'>
+                            No Results
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<script src="{{ url_for("static", filename="app.js")}}"></script>
+</body>
+</html>
+
+
