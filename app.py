@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import requests
-from geopy import geocoders
-
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 
 USGS_API_URL_BASE = "https://earthquake.usgs.gov/fdsnws/event/1/query"
 
@@ -9,6 +9,29 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+geolocator = Nominatim(user_agent='earthquake_locator (Hasnat4763)')
+geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+
+
+@app.route('/api/geocode')
+def geocode_api():
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"error": "Place name is required."}), 400
+    location = geocode(query)
+    if not location:
+        return jsonify({
+            "error": "Location Not Found"
+        }), 404
+    
+    return jsonify({
+        "query": query,
+        "address": location.address,
+        "latitude": location.latitude,
+        "longitude": location.longitude
+    })
+
 
 @app.get("/api/earthquakes")
 def get_earthquakes():
