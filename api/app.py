@@ -12,7 +12,7 @@ def index():
 
 geolocator = Nominatim(user_agent='earthquake_locator (Hasnat4763)')
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-
+reverse = RateLimiter(geolocator.reverse, min_delay_seconds=1)
 
 @app.route('/api/geocode')
 def geocode_api():
@@ -95,6 +95,37 @@ def earthquakes_by_radius():
     
     return jsonify(response.json()), 200
 
+@app.get("/api/reverse_geocode")
+def reversegeocode():
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    if not lat or not lon:
+        return jsonify({
+            "error": "Latitude and Longitude are required."
+            
+        }), 400
+    try:
+        location = reverse(f"{lat}, {lon}", language="en")
+        if not location:
+            return jsonify({
+                "error": "Location not found"
+            }), 404
+        address_data = location.raw.get("address", {})
+
+        city = address_data.get("city") or address_data.get("town") or address_data.get("village", "")
+        country = address_data.get("country", "")
+
+        address = f"{city}, {country}"
+
+        print(address)
+        return jsonify({
+            "address": address
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to fetch reverse geocoding data."
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

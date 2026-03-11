@@ -1,14 +1,14 @@
 :root {
-  --bg: #0b1020;
-  --card: #121a33;
-  --card-2: #0f1730;
-  --text: #e8ecff;
+  --bg: #2846a8;
+  --card: #3b5299;
+  --card-2: #162a66;
+  --text: #ffffff;
   --muted: #a9b1d6;
-  --border: rgba(255, 255, 255, 0.10);
-  --accent: #7aa2f7;
+  --border: rgba(77, 67, 67, 0.1);
+  --accent: #6077aa;
   --accent-2: #2ac3de;
   --danger: #f7768e;
-  --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  --shadow: 0 10px 30px rgba(65, 48, 48, 0.35);
   --radius: 14px;
 }
 
@@ -155,7 +155,7 @@ tbody tr:hover {
 
 .muted { color: var(--muted); }
 
-/* Mobile */
+
 @media (max-width: 900px) {
   .grid { grid-template-columns: 1fr; }
   table { min-width: 640px; }

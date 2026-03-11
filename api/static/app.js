@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setStatus(`Error geocoding Location ${err.message}`);
         }
     }
-    locbtn.addEventListener('click', getLocation);
+    locbtn.addEventListener('click', getLocationauto);
 
     location_form.addEventListener('submit', async(e) => {
         e.preventDefault();
@@ -171,3 +171,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })
 })
+
+
+function getLocationauto() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+    }
+    else {
+        alert("Geolocation is not supported by this browser.");
+    }
+
+    async function success(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        var city = position.city || "Current Location";
+        const res = await fetch(`/api/reverse_geocode?lat=${lat}&lon=${lon}`)
+        const data = await res.json();
+        if (!res.ok) {
+            setStatus(`Error: ${data.error || res.statusText}`);
+        }
+        city = data.address || city;
+        document.querySelector('input[name="latitude"]').value = lat.toFixed(4);
+        document.querySelector('input[name="longitude"]').value = lon.toFixed(4);
+        document.querySelector('input[name="location"]').value = city;
+    }
+    function error(err) {
+        alert(`Error getting location: ${err.message}`);
+    }
+}
